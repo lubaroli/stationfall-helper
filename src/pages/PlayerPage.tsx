@@ -138,16 +138,32 @@ function IdentityCardDisplay({ character }: { character: IdentityCardType }) {
           <h4 className="text-xs font-semibold text-indigo-800 uppercase tracking-wide mb-2">
             Agenda: {character.agenda.name}
           </h4>
-          <ul className="space-y-1.5">
+          <ul className="space-y-0">
             {character.agenda.items.map((item, idx: number) => (
               <li 
                 key={idx} 
-                className={`text-sm flex gap-2 ${item.isBonus ? 'text-indigo-600 pl-3' : 'text-indigo-900'}`}
+                className={`text-sm flex gap-2 py-1 ${item.isBonus ? 'text-indigo-600' : 'text-indigo-900'}`}
               >
-                <span className={`font-semibold flex-shrink-0 min-w-[70px] ${item.isBonus ? 'text-indigo-500' : 'text-indigo-700'}`}>
-                  {item.points}
-                </span>
-                <span>{item.condition}</span>
+                {item.isBonus ? (
+                  // Bonus items with visual tree structure
+                  <>
+                    <span className="flex-shrink-0 text-indigo-400 font-mono text-xs leading-5">
+                      &nbsp;&nbsp;├─
+                    </span>
+                    <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-500">
+                      {item.points}
+                    </span>
+                    <span>{item.condition}</span>
+                  </>
+                ) : (
+                  // Primary items
+                  <>
+                    <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-700">
+                      {item.points}
+                    </span>
+                    <span>{item.condition}</span>
+                  </>
+                )}
               </li>
             ))}
           </ul>
