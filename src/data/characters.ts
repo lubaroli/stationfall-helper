@@ -1,10 +1,31 @@
-import type { Character, Ability } from '@/types';
+import type { Character, Ability, Agenda, AgendaItem, BonusCharacterRule } from '@/types';
 
 // Helper to create abilities with proper typing
 const ability = (name: string, description: string, type: Ability['type']): Ability => ({
   name,
   description,
   type,
+});
+
+// Helper to create agenda items
+const agendaItem = (points: string, condition: string, isBonus?: boolean): AgendaItem => ({
+  points,
+  condition,
+  ...(isBonus && { isBonus }),
+});
+
+// Helper to create agendas
+const agenda = (name: string, items: AgendaItem[], note?: string): Agenda => ({
+  name,
+  items,
+  ...(note && { note }),
+});
+
+// Helper to create bonus character rules
+const bcRule = (type: BonusCharacterRule['type'], points: string, condition: string): BonusCharacterRule => ({
+  type,
+  points,
+  condition,
 });
 
 export const CHARACTERS: Character[] = [
@@ -25,6 +46,13 @@ export const CHARACTERS: Character[] = [
       ability('Zero Born', 'Free Step / Airlock into zero-g', 'mobility'),
     ],
     scoringSummary: ['Escape w/briefcase, artifact, gun'],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Astrochimp is your BC and Escapes'),
+    agenda: agenda('Shiny Things', [
+      agendaItem('3 points', 'if Astrochimp Escapes'),
+      agendaItem('+2 points', 'if in Possession of Briefcase', true),
+      agendaItem('+2 points', 'if in Possession of Artifact', true),
+      agendaItem('+2 points', 'if in Possession of a Gun', true),
+    ]),
   },
   {
     id: 'counselor',
@@ -46,6 +74,13 @@ export const CHARACTERS: Character[] = [
       'More Kompromat than any other player',
       'Least cubes in Betrayal',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Counselor is your BC and Escapes'),
+    agenda: agenda('Cloak and Dagger', [
+      agendaItem('2 points', 'if Counselor Escapes'),
+      agendaItem('4 points', 'if the Artifact Escapes'),
+      agendaItem('2 points', 'if you have more Kompromat than any other player at Stationfall'),
+      agendaItem('1 point', 'if you have the least Cubes in Betrayal Box at Stationfall'),
+    ]),
   },
   {
     id: 'cyborg',
@@ -69,6 +104,13 @@ export const CHARACTERS: Character[] = [
       'No Contamination Escapes',
       'Project X released',
     ],
+    bonusCharacterRule: bcRule('grudge', '2 points', 'if Cyborg is your BC and is not Live at Stationfall'),
+    agenda: agenda('Revenge', [
+      agendaItem('1 point', 'for each Character with Officer that is Down at Stationfall'),
+      agendaItem('2 points', 'if no Human PCs Escape'),
+      agendaItem('2 points', 'if no Contamination Escapes'),
+      agendaItem('2 points', 'if Project X was released'),
+    ]),
   },
   {
     id: 'daredevil',
@@ -90,6 +132,13 @@ export const CHARACTERS: Character[] = [
       'Be the only Human to Escape',
       'Project X released',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Daredevil is your BC and Escapes'),
+    agenda: agenda('Thrillseeker', [
+      agendaItem('3 points', 'if Daredevil Escapes'),
+      agendaItem('+2 points', 'if you are the only Human that Escapes', true),
+      agendaItem('+2 points', 'if Possess Artifact or are Contaminated', true),
+      agendaItem('1 point', 'if Project X was released'),
+    ]),
   },
   {
     id: 'exile',
@@ -112,6 +161,12 @@ export const CHARACTERS: Character[] = [
       'Possess Kompromat of Escaped Characters',
       'Have Evidence while News does not',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Exile is your BC and Escapes'),
+    agenda: agenda('Back in the Game', [
+      agendaItem('2 points', 'if Exile Escapes'),
+      agendaItem('+2 points', 'for each Possessed Kompromat of Escaped Characters', true),
+      agendaItem('+3 points', 'if Exile has Evidence and News does not', true),
+    ]),
   },
   {
     id: 'engineer',
@@ -134,6 +189,13 @@ export const CHARACTERS: Character[] = [
       'Artifact does not Escape',
       'Innocent',
     ],
+    bonusCharacterRule: bcRule('grudge', '2 points', 'if Engineer is your BC and is not Live at Stationfall'),
+    agenda: agenda('Preserve Ecosphere', [
+      agendaItem('3 points', 'if Antimatter detonates On Board before Stationfall'),
+      agendaItem('3 points', 'if no Contaminated Characters Escape'),
+      agendaItem('2 points', 'if Artifact does not Escape'),
+      agendaItem('1 point', 'if Innocent (but may win even if Guilty)'),
+    ]),
   },
   {
     id: 'inspector',
@@ -154,6 +216,13 @@ export const CHARACTERS: Character[] = [
       'Escape w/briefcase',
       'Authorities have Evidence, News does not',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Inspector is your BC and Escapes'),
+    agenda: agenda('Dirty', [
+      agendaItem('2 points', 'if Inspector Escapes'),
+      agendaItem('+4 points', 'if Possess Briefcase', true),
+      agendaItem('1 point', 'if Authorities end with Evidence'),
+      agendaItem('+2 points', 'if News does not', true),
+    ]),
   },
   {
     id: 'medical',
@@ -175,6 +244,11 @@ export const CHARACTERS: Character[] = [
       'Revive Humans',
       'Cubes to Betrayal when reveal',
     ],
+    bonusCharacterRule: bcRule('grudge', '1 point', 'if Medical is your BC and is not Live at Stationfall'),
+    agenda: agenda('Be Really Useful', [
+      agendaItem('2 points', 'if no Down Humans On Board at Stationfall'),
+      agendaItem('1 point', 'for each star reached on the tracker on the Character card'),
+    ], 'Move tracker one slot for every: Human Revival performed by Medical OR Cube moved to Betrayal upon Medical\'s Reveal'),
   },
   {
     id: 'station-chief',
@@ -196,6 +270,12 @@ export const CHARACTERS: Character[] = [
       'NPC Officers Escape',
       'On Board and Live at Stationfall',
     ],
+    bonusCharacterRule: bcRule('grudge', '2 points', 'if Station Chief is your BC and is not Live at Stationfall'),
+    agenda: agenda('Go Down With The Ship', [
+      agendaItem('1 point', 'for every other Human that Escapes'),
+      agendaItem('+1 point', 'per NPC with the Officer ability that Escapes', true),
+      agendaItem('2 points', 'if Station Chief is On Board and Live at Stationfall'),
+    ]),
   },
   {
     id: 'stowaway',
@@ -217,6 +297,13 @@ export const CHARACTERS: Character[] = [
       'News has Evidence',
       'Escape with Evidence; no one else does',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Stowaway is your BC and Escapes'),
+    agenda: agenda('Scoop of a Lifetime', [
+      agendaItem('2 points', 'if News ends with X-Secret'),
+      agendaItem('2 points', 'if News ends with Evidence'),
+      agendaItem('2 points', 'if Stowaway Escapes'),
+      agendaItem('+3 points', 'if Escape with Evidence and no other Character does', true),
+    ]),
   },
   {
     id: 'stranger',
@@ -238,6 +325,13 @@ export const CHARACTERS: Character[] = [
       'Possess X-Secret; score Bonus Points',
       'Live and Colocated with Bonus Character',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Stranger is your BC and Escapes'),
+    agenda: agenda("It's Personal", [
+      agendaItem('1 point', 'if your Secret Identity is not revealed until Stationfall'),
+      agendaItem('1 point', 'if Possess X-Secret'),
+      agendaItem('2 points', 'if you score Bonus Points'),
+      agendaItem('2 points', 'if Live and Colocated with a Bonus Character of yours at Stationfall'),
+    ]),
   },
   {
     id: 'troubleshooter',
@@ -258,6 +352,13 @@ export const CHARACTERS: Character[] = [
       'Antimatter not Armed; Project X not released; no Sections Damaged',
       'Live Robots',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Troubleshooter is your BC and Escapes'),
+    agenda: agenda('Pristine \'til the End', [
+      agendaItem('2 points', 'if Antimatter is not Armed at Stationfall'),
+      agendaItem('2 points', 'if Project X was never released'),
+      agendaItem('2 points', 'if no Sections are Damaged at Stationfall'),
+      agendaItem('1 point', 'for each Live Robot at Stationfall'),
+    ]),
   },
 
   // Middle Tier (9 characters)
@@ -281,6 +382,12 @@ export const CHARACTERS: Character[] = [
       'Escape w/Briefcase (or Briefcase in Outer Space)',
       'Get Humans in Outer Space',
     ],
+    bonusCharacterRule: bcRule('friend', '1 point', 'if Boarder is your BC and Escapes'),
+    agenda: agenda('Loot', [
+      agendaItem('2 points', 'if Boarder Escapes'),
+      agendaItem('+4 points', 'if Boarder in Possession of Briefcase or if Briefcase is in Outer Space at Stationfall', true),
+      agendaItem('+1 point', 'for every Live Human in Outer Space at Stationfall', true),
+    ]),
   },
   {
     id: 'colonel',
@@ -303,6 +410,13 @@ export const CHARACTERS: Character[] = [
       'Project X released',
       'X-Secret Escapes',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Colonel is your BC and Escapes'),
+    agenda: agenda('Weapons Test', [
+      agendaItem('3 points', 'if Colonel Escapes'),
+      agendaItem('2 points', 'if at least one Contaminated NPC Escapes'),
+      agendaItem('2 points', 'if Project X is released'),
+      agendaItem('2 points', 'if the X-Secret Escapes'),
+    ]),
   },
   {
     id: 'corpsicle',
@@ -324,13 +438,20 @@ export const CHARACTERS: Character[] = [
       'X-Secret Escapes',
       'Project X not released',
     ],
+    bonusCharacterRule: bcRule('friend', '3 points', 'if Corpsicle is your BC and Escapes'),
+    agenda: agenda('Miracle Cure', [
+      agendaItem('3 points', 'if Corpsicle Escapes'),
+      agendaItem('+2 points', 'if Possess Nanogel', true),
+      agendaItem('2 points', 'if X-Secret Escapes'),
+      agendaItem('2 points', 'if Project X is not released'),
+    ]),
   },
   {
     id: 'doctor',
     name: 'Doctor',
     type: 'human',
     tier: 'middle',
-    identityCardCount: 2,
+    identityCardCount: 2, // Creates 2 identity cards: Jekyll and Hyde
     startingSection: 'Forward Hub',
     influenceLimit: 5,
     abilities: [
@@ -345,6 +466,8 @@ export const CHARACTERS: Character[] = [
       'Hyde: Escape w/briefcase, Live in Pod with Down Human',
       'Jekyll: Escape Contaminated and/or w/Artifact, News and Authorities do not have Evidence',
     ],
+    // Note: Doctor has 2 identity cards with different agendas - Jekyll and Hyde
+    // These are handled specially in gameService.ts createIdentityCardPool()
   },
   {
     id: 'drones',
@@ -360,6 +483,8 @@ export const CHARACTERS: Character[] = [
     ],
     revealPowers: [],
     scoringSummary: ['N/A - No Identity Card'],
+    bonusCharacterRule: bcRule('none', '', 'Drones cannot be anyone\'s BC'),
+    // Drones have no Identity card and no Agenda
   },
   {
     id: 'maintenance-clones',
@@ -377,6 +502,12 @@ export const CHARACTERS: Character[] = [
       ability('Go Go Go!', 'On Reveal, each clone may perform an Action', 'utility'),
     ],
     scoringSummary: ['Clones Escape', 'News has Evidence'],
+    bonusCharacterRule: bcRule('friend', '1 point', 'for every Clone that Escapes (+1 point if all 3 Clones Escape)'),
+    agenda: agenda('Prove Clones Exist', [
+      agendaItem('1 point', 'if a Clone Escapes'),
+      agendaItem('+4 points', 'if at least two Clones Escape', true),
+      agendaItem('+2 points', 'if News ends with Evidence', true),
+    ]),
   },
   {
     id: 'microbiologist',
@@ -398,6 +529,12 @@ export const CHARACTERS: Character[] = [
       'Contaminated Characters Escape',
       'X-Secret Escapes',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Microbiologist is your BC and Escapes'),
+    agenda: agenda('Sentient Pathogen', [
+      agendaItem('2 points', 'if Microbiologist Escapes'),
+      agendaItem('1 point', 'for every Contaminated Character that Escapes'),
+      agendaItem('2 points', 'if the X-Secret Escapes'),
+    ]),
   },
   {
     id: 'operative',
@@ -421,6 +558,14 @@ export const CHARACTERS: Character[] = [
       'No Contaminated Characters Escape',
       'No Robots Escape',
     ],
+    bonusCharacterRule: bcRule('grudge', '2 points', 'if Operative is your BC and is not Live at Stationfall'),
+    agenda: agenda('Coverup', [
+      agendaItem('2 points', 'if Evidence does not Escape'),
+      agendaItem('2 points', 'if X-Secret does not Escape'),
+      agendaItem('2 points', 'if no Innocent PCs Escape'),
+      agendaItem('2 points', 'if no Contaminated Characters Escape'),
+      agendaItem('1 point', 'if no Robots Escape'),
+    ]),
   },
   {
     id: 'security',
@@ -443,6 +588,13 @@ export const CHARACTERS: Character[] = [
       'Down Humans with Guns/Bludgeons',
       'Briefcase / Artifact do not Escape',
     ],
+    bonusCharacterRule: bcRule('grudge', '3 points', 'if Security is your BC and is not Live at Stationfall'),
+    agenda: agenda('Peace Through Superior Firepower', [
+      agendaItem('1 point', 'per Down Fugitive, Monster, or non-Innocent Player PC On Board at Stationfall'),
+      agendaItem('1 point', 'per Down Human with Bludgeon or Gun On Board at Stationfall'),
+      agendaItem('1 point', 'if Briefcase does not Escape'),
+      agendaItem('1 point', 'if Artifact does not Escape (+1 point if both Briefcase + Artifact do not Escape)'),
+    ]),
   },
 
   // High Tier (3 characters)
@@ -466,6 +618,13 @@ export const CHARACTERS: Character[] = [
       'Escape Contaminated',
       'Fang Moss Escapes',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Botanist is your BC and Fang Moss Escapes (0 points if Botanist Escapes)'),
+    agenda: agenda('Blood Meal', [
+      agendaItem('2 points', 'for every Human Annihilated by Fang Moss'),
+      agendaItem('2 points', 'if Fang Moss Escapes'),
+      agendaItem('2 points', 'if Botanist Escapes'),
+      agendaItem('+1 point', 'if Contaminated', true),
+    ]),
   },
   {
     id: 'billionaire',
@@ -486,6 +645,13 @@ export const CHARACTERS: Character[] = [
       'Escape w/Fletcher & no other Live characters',
       'Do not score for Bribes',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Billionaire is your BC and Fletcher (the dog) Escapes'),
+    agenda: agenda('Survive', [
+      agendaItem('4 points', 'if Billionaire Escapes'),
+      agendaItem('+1 point', 'if not Colocated with Live Humans or Robots at Stationfall', true),
+      agendaItem('2 points', 'if Fletcher Escapes'),
+      agendaItem('+1 point', 'if Fletcher and Billionaire are Colocated when Escaping', true),
+    ], 'Billionaire doesn\'t score any Possessed or unused Bribes (grey Bribes only score if he Escapes)'),
   },
   {
     id: 'consort',
@@ -507,6 +673,13 @@ export const CHARACTERS: Character[] = [
       'Not with Live Human/Robot at Stationfall',
       'Not Revealed',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Consort is your BC and Escapes'),
+    agenda: agenda('New Life', [
+      agendaItem('0 points', 'if Consort Escapes'),
+      agendaItem('+3 points', 'if not Colocated with Live Human or Robot at Stationfall', true),
+      agendaItem('+3 points', 'if Possess Briefcase', true),
+      agendaItem('+1 point', 'if Secret Identity not Revealed until Stationfall', true),
+    ]),
   },
 
   // Experienced Tier (3 characters with additional rules)
@@ -527,6 +700,12 @@ export const CHARACTERS: Character[] = [
       ability('Trojan Horse', 'On Reveal, copy self to an Unescaped Character with Evidence or X-Secret', 'utility'),
     ],
     scoringSummary: ['As many copies of Digital Assistant Escape as possible'],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Digital Assistant is your BC and Escapes'),
+    agenda: agenda('Proliferate', [
+      agendaItem('2 points', 'for every Escaped Robot that Possesses Digital Assistant'),
+      agendaItem('1 point', 'for every Offsite or Escaped Human that Possesses Digital Assistant'),
+      agendaItem('2 points', 'if at least two copies of Digital Assistant Escape'),
+    ]),
   },
   {
     id: 'legal',
@@ -550,6 +729,13 @@ export const CHARACTERS: Character[] = [
       'Evidence does not Escape',
       'Suspect PCs',
     ],
+    bonusCharacterRule: bcRule('grudge', '1 point', 'if Legal is your BC and is not Live at Stationfall'),
+    agenda: agenda('Reduce Corporate Liability', [
+      agendaItem('1 point', 'for each Human that Escapes with NDA'),
+      agendaItem('4 points', 'if no Humans Escape or all Escaped Humans have NDA'),
+      agendaItem('2 points', 'if the Evidence does not Escape'),
+      agendaItem('1 point', 'for each Suspect (not Guilty) PC at Stationfall'),
+    ]),
   },
   {
     id: 'telepathic-rat',
@@ -571,8 +757,46 @@ export const CHARACTERS: Character[] = [
       'Colocated Down Characters\' Kompromat',
       'Colocated with artifact and/or briefcase',
     ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Telepathic Rat is your BC and Escapes'),
+    agenda: agenda('Penance', [
+      agendaItem('1 point', 'for each Down Human or Robot Colocated with Rat at Stationfall'),
+      agendaItem('+2 points', 'for each Possessed Kompromat of Colocated Down Characters', true),
+      agendaItem('2 points', 'if Rat Colocated with Artifact at Stationfall'),
+      agendaItem('2 points', 'if Rat Colocated with Briefcase at Stationfall'),
+    ]),
   },
 ];
+
+// Doctor variant definitions for Jekyll and Hyde identity cards
+export const DOCTOR_VARIANTS = {
+  jekyll: {
+    variant: 'jekyll',
+    variantLabel: 'Jekyll',
+    revealPowers: [
+      ability('Fake Artifact', 'Gain artifact unless possessed by a PC', 'utility'),
+    ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Doctor is your BC and Escapes'),
+    agenda: agenda('Science', [
+      agendaItem('1 point', 'if Doctor Escapes'),
+      agendaItem('+3 points', 'if Contaminated', true),
+      agendaItem('+3 points', 'if Possess Artifact', true),
+      agendaItem('3 points', 'if News and Authorities do not have Evidence at Stationfall'),
+    ]),
+  },
+  hyde: {
+    variant: 'hyde',
+    variantLabel: 'Hyde',
+    revealPowers: [
+      ability('ZipGun', 'Gain a gun', 'offensive'),
+    ],
+    bonusCharacterRule: bcRule('friend', '2 points', 'if Doctor is your BC and Escapes'),
+    agenda: agenda('Cruelty', [
+      agendaItem('2 points', 'if Doctor Escapes'),
+      agendaItem('+3 points', 'if Possess Briefcase', true),
+      agendaItem('+4 points', 'if Escaped Live in a Pod with a Down Human', true),
+    ]),
+  },
+} as const;
 
 export function getCharacterById(id: string): Character | undefined {
   return CHARACTERS.find((c) => c.id === id);

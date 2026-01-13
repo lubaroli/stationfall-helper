@@ -1,11 +1,30 @@
 export type CharacterType = 'human' | 'robot' | 'data' | 'human-robot';
 export type ComplexityTier = 'beginner' | 'middle' | 'high' | 'experienced';
 export type AbilityType = 'console' | 'conspirator' | 'offensive' | 'defensive' | 'mobility' | 'utility';
+export type BonusCharacterType = 'friend' | 'grudge' | 'none';
 
 export interface Ability {
   name: string;
   description: string;
   type: AbilityType;
+}
+
+export interface AgendaItem {
+  points: string; // e.g., "3 points", "+2 points", "1 point per..."
+  condition: string; // The condition to score
+  isBonus?: boolean; // True if this requires a primary condition to be met first
+}
+
+export interface Agenda {
+  name: string;
+  items: AgendaItem[];
+  note?: string; // Optional note like "Billionaire doesn't score for Bribes"
+}
+
+export interface BonusCharacterRule {
+  type: BonusCharacterType;
+  points: string;
+  condition: string;
 }
 
 export interface Character {
@@ -19,6 +38,15 @@ export interface Character {
   abilities: Ability[];
   revealPowers: Ability[];
   scoringSummary: string[];
+  bonusCharacterRule?: BonusCharacterRule;
+  agenda?: Agenda;
+}
+
+// IdentityCard represents a specific card dealt to a player
+// For most characters this is the same as Character, but Doctor has 2 variants
+export interface IdentityCard extends Character {
+  variant?: string; // e.g., 'jekyll' or 'hyde' for Doctor
+  variantLabel?: string; // e.g., 'Jekyll' or 'Hyde' for display
 }
 
 export interface GameConfig {
@@ -30,7 +58,7 @@ export interface GameConfig {
 export interface PlayerAssignment {
   token: string;
   name: string;
-  identityCards: Character[];
+  identityCards: IdentityCard[];
 }
 
 export interface GameState {
@@ -43,5 +71,5 @@ export interface GameState {
 
 export interface PlayerData {
   playerName: string;
-  identityCards: Character[];
+  identityCards: IdentityCard[];
 }

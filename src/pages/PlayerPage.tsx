@@ -4,7 +4,7 @@ import { decodePlayerData } from '@/services/gameService';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import type { Character, Ability, AbilityType } from '@/types';
+import type { IdentityCard as IdentityCardType, Ability, AbilityType } from '@/types';
 
 // Color styles for each ability type matching the reference document
 const ABILITY_STYLES: Record<AbilityType, { bg: string; border: string; text: string; label: string }> = {
@@ -65,7 +65,7 @@ function AbilityBox({ ability, isRevealPower = false }: { ability: Ability; isRe
   );
 }
 
-function IdentityCard({ character }: { character: Character }) {
+function IdentityCardDisplay({ character }: { character: IdentityCardType }) {
   const typeLabels: Record<string, string> = {
     human: 'Human',
     robot: 'Robot',
@@ -78,6 +78,12 @@ function IdentityCard({ character }: { character: Character }) {
     middle: 'Middle',
     high: 'High',
     experienced: 'Expert',
+  };
+
+  const bcTypeLabels: Record<string, { label: string; color: string }> = {
+    friend: { label: 'Friend', color: 'text-emerald-700 bg-emerald-50 border-emerald-300' },
+    grudge: { label: 'Grudge', color: 'text-rose-700 bg-rose-50 border-rose-300' },
+    none: { label: 'N/A', color: 'text-gray-500 bg-gray-50 border-gray-300' },
   };
 
   return (
@@ -105,7 +111,7 @@ function IdentityCard({ character }: { character: Character }) {
             Abilities
           </h4>
           <div className="space-y-2">
-            {character.abilities.map((ability, idx) => (
+            {character.abilities.map((ability: Ability, idx: number) => (
               <AbilityBox key={idx} ability={ability} />
             ))}
           </div>
@@ -119,20 +125,75 @@ function IdentityCard({ character }: { character: Character }) {
             Reveal Powers
           </h4>
           <div className="space-y-2">
-            {character.revealPowers.map((power, idx) => (
+            {character.revealPowers.map((power: Ability, idx: number) => (
               <AbilityBox key={idx} ability={power} isRevealPower />
             ))}
           </div>
         </div>
       )}
 
-      {/* Scoring Summary */}
+      {/* Agenda - Primary scoring section */}
+      {character.agenda && (
+        <div className="bg-indigo-50 border border-indigo-300 rounded-lg p-3 mb-4">
+          <h4 className="text-xs font-semibold text-indigo-800 uppercase tracking-wide mb-2">
+            Agenda: {character.agenda.name}
+          </h4>
+          <ul className="space-y-1.5">
+            {character.agenda.items.map((item, idx: number) => (
+              <li 
+                key={idx} 
+                className={`text-sm flex gap-2 ${item.isBonus ? 'text-indigo-600 pl-3' : 'text-indigo-900'}`}
+              >
+                <span className={`font-semibold flex-shrink-0 min-w-[70px] ${item.isBonus ? 'text-indigo-500' : 'text-indigo-700'}`}>
+                  {item.points}
+                </span>
+                <span>{item.condition}</span>
+              </li>
+            ))}
+          </ul>
+          {character.agenda.note && (
+            <p className="text-xs text-indigo-600 mt-2 italic border-t border-indigo-200 pt-2">
+              Note: {character.agenda.note}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Bonus Character Rule */}
+      {character.bonusCharacterRule && character.bonusCharacterRule.type !== 'none' && (
+        <div className={`border rounded-lg p-3 mb-4 ${bcTypeLabels[character.bonusCharacterRule.type].color}`}>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wide">
+              Bonus Character Rule
+            </h4>
+            <span className={`text-xs px-1.5 py-0.5 rounded border ${bcTypeLabels[character.bonusCharacterRule.type].color}`}>
+              {bcTypeLabels[character.bonusCharacterRule.type].label}
+            </span>
+          </div>
+          <p className="text-sm">
+            <span className="font-semibold">{character.bonusCharacterRule.points}</span>
+            {' '}{character.bonusCharacterRule.condition}
+          </p>
+        </div>
+      )}
+
+      {/* Special case for characters with no BC rule (like Drones) */}
+      {character.bonusCharacterRule && character.bonusCharacterRule.type === 'none' && (
+        <div className={`border rounded-lg p-3 mb-4 ${bcTypeLabels.none.color}`}>
+          <h4 className="text-xs font-semibold uppercase tracking-wide mb-1">
+            Bonus Character Rule
+          </h4>
+          <p className="text-sm">{character.bonusCharacterRule.condition}</p>
+        </div>
+      )}
+
+      {/* Scoring Summary - kept as quick reference */}
       <div className="bg-slate-100 border border-slate-300 rounded-lg p-3">
         <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-          Scoring Summary
+          Quick Reference
         </h4>
         <ul className="space-y-1">
-          {character.scoringSummary.map((score, idx) => (
+          {character.scoringSummary.map((score: string, idx: number) => (
             <li key={idx} className="text-sm text-slate-700 flex gap-2">
               <span className="text-slate-400 flex-shrink-0">-</span>
               <span>{score}</span>
@@ -218,7 +279,7 @@ export function PlayerPage() {
             Your Identity Cards ({identityCards.length})
           </h2>
           {identityCards.map((card, index) => (
-            <IdentityCard key={`${card.id}-${index}`} character={card} />
+            <IdentityCardDisplay key={`${card.id}-${index}`} character={card} />
           ))}
         </div>
 

@@ -1,5 +1,6 @@
-import type { Character, GameState, PlayerAssignment, PlayerData } from '@/types';
+import type { Character, GameState, PlayerAssignment, PlayerData, IdentityCard } from '@/types';
 import { getGameConfig, getTotalIdentityCardsNeeded } from '@/data/gameRules';
+import { DOCTOR_VARIANTS } from '@/data/characters';
 import { shuffleArray, generateId } from '@/utils/shuffle';
 import { encryptForUrl, decryptFromUrl } from './encryption';
 
@@ -44,13 +45,42 @@ export function validateSelection(
 
 /**
  * Create identity card pool from characters
- * Doctor contributes 2 cards, Drones contributes 0
+ * Doctor contributes 2 distinct cards (Jekyll and Hyde), Drones contributes 0
  */
-function createIdentityCardPool(characters: Character[]): Character[] {
-  const pool: Character[] = [];
+function createIdentityCardPool(characters: Character[]): IdentityCard[] {
+  const pool: IdentityCard[] = [];
   for (const char of characters) {
-    for (let i = 0; i < char.identityCardCount; i++) {
-      pool.push(char);
+    if (char.id === 'doctor') {
+      // Doctor has 2 distinct identity cards: Jekyll and Hyde
+      const jekyllVariant = DOCTOR_VARIANTS.jekyll;
+      const hydeVariant = DOCTOR_VARIANTS.hyde;
+      
+      pool.push({
+        ...char,
+        name: 'Doctor (Jekyll)',
+        variant: jekyllVariant.variant,
+        variantLabel: jekyllVariant.variantLabel,
+        revealPowers: [...jekyllVariant.revealPowers],
+        bonusCharacterRule: { ...jekyllVariant.bonusCharacterRule },
+        agenda: { ...jekyllVariant.agenda, items: [...jekyllVariant.agenda.items] },
+        scoringSummary: ['Escape Contaminated and/or w/Artifact', 'News and Authorities do not have Evidence'],
+      });
+      
+      pool.push({
+        ...char,
+        name: 'Doctor (Hyde)',
+        variant: hydeVariant.variant,
+        variantLabel: hydeVariant.variantLabel,
+        revealPowers: [...hydeVariant.revealPowers],
+        bonusCharacterRule: { ...hydeVariant.bonusCharacterRule },
+        agenda: { ...hydeVariant.agenda, items: [...hydeVariant.agenda.items] },
+        scoringSummary: ['Escape w/briefcase', 'Live in Pod with Down Human'],
+      });
+    } else {
+      // Normal characters: add as many cards as identityCardCount
+      for (let i = 0; i < char.identityCardCount; i++) {
+        pool.push(char);
+      }
     }
   }
   return pool;
@@ -76,7 +106,7 @@ export function dealCards(
   let cardIndex = 0;
 
   for (let i = 0; i < playerCount; i++) {
-    const playerCards: Character[] = [];
+    const playerCards: IdentityCard[] = [];
     for (let j = 0; j < config.identityCardsPerPlayer; j++) {
       if (cardIndex < shuffledPool.length) {
         playerCards.push(shuffledPool[cardIndex]);
