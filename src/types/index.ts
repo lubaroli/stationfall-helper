@@ -69,7 +69,19 @@ export interface GameState {
   createdAt: number;
 }
 
+// Compact representation for URL encoding
+export interface CompactIdentityCard {
+  id: string;
+  variant?: string; // 'jekyll' or 'hyde' for Doctor
+}
+
 export interface PlayerData {
   playerName: string;
   identityCards: IdentityCard[];
+}
+
+// Compact version for URL encoding (reduces link size by ~95%)
+export interface CompactPlayerData {
+  name: string;
+  cards: CompactIdentityCard[];
 }

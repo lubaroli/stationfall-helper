@@ -1,6 +1,6 @@
-import type { Character, GameState, PlayerAssignment, PlayerData, IdentityCard } from '@/types';
+import type { Character, GameState, PlayerAssignment, PlayerData, IdentityCard, CompactPlayerData, CompactIdentityCard } from '@/types';
 import { getGameConfig, getTotalIdentityCardsNeeded } from '@/data/gameRules';
-import { DOCTOR_VARIANTS } from '@/data/characters';
+import { DOCTOR_VARIANTS, getCharacterById } from '@/data/characters';
 import { shuffleArray, generateId } from '@/utils/shuffle';
 import { encryptForUrl, decryptFromUrl } from './encryption';
 
@@ -168,16 +168,73 @@ export function createPlayerData(player: PlayerAssignment): PlayerData {
 }
 
 /**
- * Encode player data for player URL
+ * Convert IdentityCard to compact format (ID + variant only)
  */
-export function encodePlayerData(player: PlayerAssignment): string {
-  const data = createPlayerData(player);
-  return encryptForUrl(data);
+function toCompactCard(card: IdentityCard): CompactIdentityCard {
+  const compact: CompactIdentityCard = { id: card.id };
+  if (card.variant) {
+    compact.variant = card.variant;
+  }
+  return compact;
 }
 
 /**
- * Decode player data from player URL
+ * Reconstruct full IdentityCard from compact format
+ */
+function fromCompactCard(compact: CompactIdentityCard): IdentityCard | null {
+  const baseChar = getCharacterById(compact.id);
+  if (!baseChar) return null;
+
+  // Handle Doctor variants
+  if (compact.id === 'doctor' && compact.variant) {
+    const variant = DOCTOR_VARIANTS[compact.variant as 'jekyll' | 'hyde'];
+    if (!variant) return null;
+
+    return {
+      ...baseChar,
+      name: `Doctor (${variant.variantLabel})`,
+      variant: variant.variant,
+      variantLabel: variant.variantLabel,
+      revealPowers: [...variant.revealPowers],
+      bonusCharacterRule: { ...variant.bonusCharacterRule },
+      agenda: { ...variant.agenda, items: [...variant.agenda.items] },
+      scoringSummary: compact.variant === 'jekyll' 
+        ? ['Escape Contaminated and/or w/Artifact', 'News and Authorities do not have Evidence']
+        : ['Escape w/briefcase', 'Live in Pod with Down Human'],
+    };
+  }
+
+  // Regular characters: return as-is
+  return baseChar as IdentityCard;
+}
+
+/**
+ * Encode player data for player URL (using compact format)
+ */
+export function encodePlayerData(player: PlayerAssignment): string {
+  const compactData: CompactPlayerData = {
+    name: player.name,
+    cards: player.identityCards.map(toCompactCard),
+  };
+  return encryptForUrl(compactData);
+}
+
+/**
+ * Decode player data from player URL (reconstructing full cards from IDs)
  */
 export function decodePlayerData(encoded: string): PlayerData | null {
-  return decryptFromUrl<PlayerData>(encoded);
+  const compactData = decryptFromUrl<CompactPlayerData>(encoded);
+  if (!compactData) return null;
+
+  const identityCards: IdentityCard[] = [];
+  for (const compactCard of compactData.cards) {
+    const card = fromCompactCard(compactCard);
+    if (!card) return null; // Invalid character ID
+    identityCards.push(card);
+  }
+
+  return {
+    playerName: compactData.name,
+    identityCards,
+  };
 }
