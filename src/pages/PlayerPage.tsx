@@ -139,39 +139,33 @@ function IdentityCardDisplay({ character }: { character: IdentityCardType }) {
             Agenda: {character.agenda.name}
           </h4>
           <ul className="space-y-0">
-            {character.agenda.items.map((item, idx: number) => {
-              // Check if this is the last bonus item after a primary item
-              const isLastBonus = item.isBonus && 
-                (idx === character.agenda!.items.length - 1 || !character.agenda!.items[idx + 1]?.isBonus);
-              
-              return (
-                <li 
-                  key={idx} 
-                  className={`text-sm flex gap-2 py-1 ${item.isBonus ? 'text-indigo-600' : 'text-indigo-900'}`}
-                >
-                  {item.isBonus ? (
-                    // Bonus items with visual tree structure
-                    <>
-                      <span className="flex-shrink-0 text-indigo-400 font-mono text-xs leading-5 select-none">
-                        &nbsp;&nbsp;{isLastBonus ? '└─' : '├─'}
-                      </span>
-                      <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-500">
-                        {item.points}
-                      </span>
-                      <span>{item.condition}</span>
-                    </>
-                  ) : (
-                    // Primary items
-                    <>
-                      <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-700">
-                        {item.points}
-                      </span>
-                      <span>{item.condition}</span>
-                    </>
-                  )}
-                </li>
-              );
-            })}
+            {character.agenda.items.map((item, idx: number) => (
+              <li 
+                key={idx} 
+                className={`text-sm flex gap-2 py-1 ${item.isBonus ? 'text-indigo-600' : 'text-indigo-900'}`}
+              >
+                {item.isBonus ? (
+                  // Bonus items with rotated L indicator
+                  <>
+                    <span className="flex-shrink-0 text-indigo-400 font-mono text-xs leading-5 select-none">
+                      &nbsp;&nbsp;└─
+                    </span>
+                    <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-500">
+                      {item.points}
+                    </span>
+                    <span>{item.condition}</span>
+                  </>
+                ) : (
+                  // Primary items
+                  <>
+                    <span className="font-semibold flex-shrink-0 min-w-[70px] text-indigo-700">
+                      {item.points}
+                    </span>
+                    <span>{item.condition}</span>
+                  </>
+                )}
+              </li>
+            ))}
           </ul>
           {character.agenda.note && (
             <p className="text-xs text-indigo-600 mt-2 italic border-t border-indigo-200 pt-2">
